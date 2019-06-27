@@ -2,7 +2,7 @@ from numbers import Number
 
 import numpy as np
 import tensorflow as tf
-
+from tqdm import tqdm
 from rllab.core.serializable import Serializable
 from rllab.misc import logger
 from rllab.misc.overrides import overrides
@@ -163,6 +163,7 @@ class SAC(RLAlgorithm, Serializable):
         self._init_actor_update()
         self._init_critic_update()
         self._init_target_ops()
+        self._init_pretrain_ops()
 
         # Initialize all uninitialized variables. This prevents initializing
         # pre-trained policy and qf and vf variables.
@@ -354,6 +355,26 @@ class SAC(RLAlgorithm, Serializable):
             tf.assign(target, (1 - self._tau) * target + self._tau * source)
             for target, source in zip(target_params, source_params)
         ]
+
+    def _init_pretrain_ops(self):
+        actions = self._policy.actions_for(observations=self._observations_ph)
+        pretrain_loss = tf.reduce_mean((actions - self._actions_ph) ** 2)
+
+        self._pretrain_ops = tf.train.AdamOptimizer(self._policy_lr).minimize(
+            loss=pretrain_loss,
+            var_list=self._policy.get_params_internal()
+        )
+
+    def _pretrain(self, dataset=None):
+        optim_batch_size = 128
+        for _ in tqdm(range(self._max_bc_iter)):
+            expert_obs, expert_acs = dataset.get_next_batch(optim_batch_size)
+            feed_dict = {
+                self._observations_ph: expert_obs,
+                self._actions_ph: expert_acs,
+            }
+            self._sess.run(self._pretrain_ops, feed_dict)
+
 
     @overrides
     def _init_training(self, env, policy, pool):

@@ -9,6 +9,7 @@ from rllab.algos.base import Algorithm
 from sac.core.serializable import deep_clone
 from sac.misc import tf_utils
 from sac.misc.sampler import rollouts
+from sac.misc.mujoco_dset import MujocoDset
 
 
 class RLAlgorithm(Algorithm):
@@ -28,7 +29,9 @@ class RLAlgorithm(Algorithm):
             eval_n_episodes=10,
             eval_deterministic=True,
             eval_render=False,
-            control_interval=1
+            control_interval=1,
+            expert_path="dataset/hopper.npz",
+            max_bc_iter=int(1e5),
     ):
         """
         Args:
@@ -56,6 +59,9 @@ class RLAlgorithm(Algorithm):
         self._eval_deterministic = eval_deterministic
         self._eval_render = eval_render
 
+        self._expert_path = expert_path
+        self._max_bc_iter = max_bc_iter
+
         self._sess = tf_utils.get_default_session()
 
         self._env = None
@@ -74,6 +80,13 @@ class RLAlgorithm(Algorithm):
         """
 
         self._init_training(env, policy, pool)
+        self._evaluate(-2)
+
+        # pretrain policy
+        dataset = MujocoDset(expert_path=self._expert_path, traj_limitation=-1)
+        self._pretrain(dataset=dataset)
+        self._evaluate(-1)
+
         if initial_exploration_policy is None:
             self.sampler.initialize(env, policy, pool)
             initial_exploration_done = True

@@ -201,6 +201,8 @@ ALGORITHM_PARAMS_BASE = {
         'eval_render': False,
         'eval_n_episodes': 1,
         'eval_deterministic': True,
+        'expert_path': 'dataset/hopper.npz',
+        'max_bc_iter': int(1e5),
     }
 }
 
@@ -215,6 +217,7 @@ ALGORITHM_PARAMS = {
         'scale_reward': 5,
         'base_kwargs': {
             'n_epochs': 1e3,
+            'expert_path': 'dataset/hopper.npz',
         }
     },
     'half-cheetah': { # 6 DoF
@@ -222,12 +225,14 @@ ALGORITHM_PARAMS = {
         'base_kwargs': {
             'n_epochs': 3e3,
             'n_initial_exploration_steps': 10000,
+            'expert_path': 'dataset/half_cheetah.npz',
         }
     },
     'walker': { # 6 DoF
         'scale_reward': 5,
         'base_kwargs': {
             'n_epochs': 1e3,
+            'expert_path': 'dataset/walker.npz',
         }
     },
     'ant': { # 8 DoF
@@ -235,12 +240,14 @@ ALGORITHM_PARAMS = {
         'base_kwargs': {
             'n_epochs': 3e3,
             'n_initial_exploration_steps': 10000,
+            'expert_path': 'dataset/ant.npz',
         }
     },
     'humanoid-gym': { # 17 DoF
         'scale_reward': 20,
         'base_kwargs': {
             'n_epochs': 1e4,
+            'expert_path': 'dataset/humanoid.npz',
         }
     },
     'humanoid-rllab': { # 21 DoF
