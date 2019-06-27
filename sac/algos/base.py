@@ -174,9 +174,9 @@ class RLAlgorithm(Algorithm):
         if self._eval_render:
             self._eval_env.render(paths)
 
-        iteration = epoch*self._epoch_length
-        batch = self.sampler.random_batch()
-        self.log_diagnostics(iteration, batch)
+        # iteration = epoch*self._epoch_length
+        # batch = self.sampler.random_batch()
+        # self.log_diagnostics(iteration, batch)
 
     @abc.abstractmethod
     def log_diagnostics(self, iteration, batch):
