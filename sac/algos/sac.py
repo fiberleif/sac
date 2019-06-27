@@ -360,6 +360,7 @@ class SAC(RLAlgorithm, Serializable):
         actions = self._policy.actions_for(observations=self._observations_ph)
         pretrain_loss = tf.reduce_mean((actions - self._actions_ph) ** 2)
 
+        tf.get_variable_scope().reuse_variables()
         self._pretrain_ops = tf.train.AdamOptimizer(self._policy_lr).minimize(
             loss=pretrain_loss,
             var_list=self._policy.get_params_internal()
